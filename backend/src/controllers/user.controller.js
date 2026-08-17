@@ -124,10 +124,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const logoutUser = asyncHandler(async (req, res) => {
 
-    const { user } = req.user
-
-    const loggedInUser = await User.findOneAndUpdate({
-        _id: req.user.id
+    await User.findOneAndUpdate({
+        _id: req.user._id
     },
         {
             $unset: {
@@ -137,17 +135,32 @@ const logoutUser = asyncHandler(async (req, res) => {
     )
 
     return res
-    .status(200)
-    .clearCookie("accessToken" , options)
-    .clearCookie("refreshToken" , options)
-    .json(
-        new ApiResponse(
-            200,
-            {},
-            "user logged out successfully."
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "user logged out successfully."
+            )
         )
-    )
 
 })
 
-export { registerUser, loginUser, logoutUser }
+const getCurrentUser = asyncHandler(async (req, res) => {
+
+    const user = req.user
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                user,
+                "current user is fetched successfully."
+            )
+        )
+})
+
+export { registerUser, loginUser, logoutUser, getCurrentUser }
