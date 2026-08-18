@@ -111,4 +111,38 @@ const deleteHabit = asyncHandler(async (req, res) => {
         )
 })
 
-export { createHabit, getUserActiveHabits, getUserArchiveHabits, deleteHabit }
+const toggleArchive = asyncHandler(async (req, res) => {
+
+    const { habitId } = req.params
+
+    if (!mongoose.isValidObjectId(habitId)) {
+        throw new ApiError(400, "Invalid habit id.")
+    }
+
+    const habit = await Habit.findOne(
+        {
+            _id: habitId,
+            owner: req.user._id
+        }
+    )
+
+    if (!habit) {
+        throw new ApiError(404, "Habit not found or you are unauthorized")
+    }
+
+    habit.isArchived = !habit.isArchived
+    await habit.save()
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                habit,
+                "Archived button is toggled."
+            )
+        )
+
+})
+
+export { createHabit, getUserActiveHabits, getUserArchiveHabits, deleteHabit, toggleArchive }
