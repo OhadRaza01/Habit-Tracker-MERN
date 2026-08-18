@@ -8,7 +8,7 @@ const habitLogSchema = new mongoose.Schema(
             required: true,
         },
 
-        user: {
+        owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
@@ -17,12 +17,7 @@ const habitLogSchema = new mongoose.Schema(
         date: {
             type: Date,
             required: true,
-        },
-
-        isCompleted: {
-            type: Boolean,
-            default: false,
-        },
+        }
     },
     {
         timestamps: true,

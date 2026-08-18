@@ -14,11 +14,12 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(express.static("public"))
 app.use(cookieParser())
 
-
 import userRouter from "../src/routes/user.routes.js"
 import habitRouter from "../src/routes/habit.routes.js"
+import habitlogRouter from "../src/routes/habitlog.routes.js"
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/habits", habitRouter)
+app.use("/api/v1/habit-logs" , habitlogRouter)
 
 export {app}
