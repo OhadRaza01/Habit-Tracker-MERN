@@ -1,6 +1,6 @@
 import { Router } from "express"
 import jwtVerify from "../middlewares/auth.middleware.js"
-import { createHabit, deleteHabit, getUserActiveHabits, getUserArchiveHabits, toggleArchive } from "../controllers/habit.controller.js"
+import { createHabit, deleteHabit, getUserActiveHabits, getUserArchiveHabits, toggleArchive, updateHabit } from "../controllers/habit.controller.js"
 
 const router = Router()
 
@@ -17,11 +17,17 @@ router.route("/archived").get(
 )
 
 router.route("/:habitId").delete(
-    jwtVerify , deleteHabit
+    jwtVerify, deleteHabit
 )
 
 router.route("/:habitId/toggle-status").patch(
-    jwtVerify , toggleArchive
+    jwtVerify, toggleArchive
+)
+
+router.patch(
+    "/:habitId",
+    jwtVerify,
+    updateHabit
 )
 
 export default router

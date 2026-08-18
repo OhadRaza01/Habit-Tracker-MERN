@@ -97,7 +97,7 @@ const deleteHabit = asyncHandler(async (req, res) => {
     })
 
     if (!habit) {
-        throw new ApiError(404, "habit not found or you are unauthorized.")
+        throw new ApiError(404, "habit not found.")
     }
 
     return res
@@ -127,7 +127,7 @@ const toggleArchive = asyncHandler(async (req, res) => {
     )
 
     if (!habit) {
-        throw new ApiError(404, "Habit not found or you are unauthorized")
+        throw new ApiError(404, "Habit not found.")
     }
 
     habit.isArchived = !habit.isArchived
@@ -145,4 +145,62 @@ const toggleArchive = asyncHandler(async (req, res) => {
 
 })
 
-export { createHabit, getUserActiveHabits, getUserArchiveHabits, deleteHabit, toggleArchive }
+const updateHabit = asyncHandler(async (req, res) => {
+    const { habitId } = req.params
+
+    if (!mongoose.isValidObjectId(habitId)) {
+        throw new ApiError(400, "Invalid habit id.")
+    }
+
+    const allowedFields = [
+        "name",
+        "description",
+        "category",
+        "frequency",
+        "target",
+        "reminderTime",
+        "startDate",
+    ]
+
+    const updates = {}
+
+    for (const field of allowedFields) {
+        if (req.body[field] !== undefined) {
+            updates[field] = req.body[field]
+        }
+    }
+
+    if (Object.keys(updates).length === 0) {
+        throw new ApiError(400, "No valid fields provided for update.")
+    }
+
+    const habit = await Habit.findOneAndUpdate(
+        {
+            _id: habitId,
+            owner: req.user._id,
+        },
+        {
+            $set: updates,
+        },
+        {
+            returnDocument:"after",
+            runValidators: true,
+        }
+    )
+
+    if (!habit) {
+        throw new ApiError(404, "Habit not found.")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                habit,
+                "Habit updated successfully."
+            )
+        )
+})
+
+export { createHabit, getUserActiveHabits, getUserArchiveHabits, deleteHabit, toggleArchive, updateHabit }
