@@ -46,4 +46,40 @@ const createHabit = asyncHandler(async (req, res) => {
         );
 });
 
-export { createHabit }
+const getUserActiveHabits = asyncHandler(async (req, res) => {
+
+    const habits = await Habit.find({
+        owner: req.user._id,
+        isArchived: false
+    });
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                habits,
+                "User active habits fetched successfully."
+            )
+        );
+});
+
+const getUserArchiveHabits = asyncHandler(async (req, res) => {
+
+    const habits = await Habit.find({
+        owner: req.user._id,
+        isArchived: true
+    });
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                habits,
+                "User archived habits fetched successfully."
+            )
+        );
+});
+
+export { createHabit, getUserActiveHabits, getUserArchiveHabits }
