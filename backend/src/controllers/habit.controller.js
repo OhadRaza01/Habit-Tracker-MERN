@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { Habit } from "../models/habit.model.js";
+import mongoose from "mongoose";
 
 const createHabit = asyncHandler(async (req, res) => {
 
@@ -82,4 +83,32 @@ const getUserArchiveHabits = asyncHandler(async (req, res) => {
         );
 });
 
-export { createHabit, getUserActiveHabits, getUserArchiveHabits }
+const deleteHabit = asyncHandler(async (req, res) => {
+
+    const { habitId } = req.params
+
+    if (!mongoose.isValidObjectId(habitId)) {
+        throw new ApiError(400, "Invalid habit id.")
+    }
+
+    const habit = await Habit.findOneAndDelete({
+        owner: req.user._id,
+        _id: habitId
+    })
+
+    if (!habit) {
+        throw new ApiError(404, "habit not found or you are unauthorized.")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Habit is deleted Successfully"
+            )
+        )
+})
+
+export { createHabit, getUserActiveHabits, getUserArchiveHabits, deleteHabit }
