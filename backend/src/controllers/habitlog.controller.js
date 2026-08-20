@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { HabitLog } from "../models/habitlog.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Habit } from "../models/habit.model.js";
+import { calculateHabitStatistics } from "../services/habitstats.service.js";
 
 const createLog = asyncHandler(async (req, res) => {
 
@@ -127,4 +128,44 @@ const getHabitHistory = asyncHandler(async (req, res) => {
         )
 })
 
-export { createLog, deleteLog, getHabitHistory }
+const getHabitStatistics = asyncHandler(async (req, res) => {
+
+    const { habitId } = req.params;
+
+    if (!mongoose.isValidObjectId(habitId)) {
+        throw new ApiError(400, "Invalid habit id.");
+    }
+
+    const habit = await Habit.findOne({
+        _id: habitId,
+        owner: req.user._id,
+    });
+
+    if (!habit) {
+        throw new ApiError(404, "Habit not found.");
+    }
+
+    const logs = await HabitLog.find({
+        habit: habitId,
+        owner: req.user._id,
+    }).sort({
+        date: 1,
+    });
+
+    const statistics = calculateHabitStatistics(
+        habit,
+        logs
+    );
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                statistics,
+                "Habit statistics fetched successfully."
+            )
+        );
+});
+
+export { createLog, deleteLog, getHabitHistory, getHabitStatistics }
