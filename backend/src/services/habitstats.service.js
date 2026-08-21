@@ -1,9 +1,4 @@
-const getDateKey = (date) => {
-    return new Date(date).toLocaleDateString("en-CA", {
-        timeZone: "Asia/Karachi",
-    });
-};
-
+import { getDateKey } from "../utils/dateUtil.js";
 
 const calculateHabitStatistics = (habit, logs) => {
 
