@@ -1,8 +1,8 @@
 import asyncHandler from "../utils/asyncHandler.js"
 import { Habit } from "../models/habit.model.js"
 import { HabitLog } from "../models/habitlog.model.js"
-import { getTodayStats } from "../services/dashboard.service.js"
-import {ApiResponse} from "../utils/ApiResponse.js"
+import { getTodayStats, getCurrentStreak } from "../services/dashboard.service.js"
+import { ApiResponse } from "../utils/ApiResponse.js"
 
 const getdashboard = asyncHandler(async (req, res) => {
 
@@ -13,19 +13,23 @@ const getdashboard = asyncHandler(async (req, res) => {
 
     const logs = await HabitLog.find({
         owner: req.user.id
-    })
+    }).sort({date : 1})
 
     const todayStats = getTodayStats(habits, logs)
+    const currentStreak = getCurrentStreak(habits, logs)
 
     return res
         .status(200)
         .json(
             new ApiResponse(
                 200,
-                todayStats,
+                {
+                    ...todayStats,
+                    currentStreak
+                },
                 "dashboard details fetched successfully"
             )
         )
 })
 
-export {getdashboard}
+export { getdashboard }
