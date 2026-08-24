@@ -34,35 +34,38 @@ export const getCurrentStreak = (habits, logs) => {
 
     const dateCounts = logs.reduce((acc, log) => {
 
-        const dateOnly = log.date.toISOString().split("T")[0];
+        const dateOnly = getDateKey(log.date);
 
         acc[dateOnly] = (acc[dateOnly] || 0) + 1;
 
         return acc
     }, {})
 
-    console.log(dateCounts)
-
     let streak = 0;
 
-    const dates = Object.keys(dateCounts)
-    console.log(dates)
+    const dates = Object.keys(dateCounts).sort(
+        (a, b) => new Date(a) - new Date(b)
+    );
 
-    for (let i = 0; i < dates.length; i++) {
+    for (let i = dates.length - 1; i >= 0; i--) {
 
-        if (dateCounts[dates[i]] == totalHabits && i !== dates.length - 1) {
-            streak++
-        }
-        else if (i === dates.length - 1 && dateCounts[dates[i]] == totalHabits) {
-            streak++
-        }
-        else if (i === dates.length - 1 && dateCounts[dates[i]] != totalHabits) {
-            streak = streak
-        }
-        else {
-            streak = 0
+        if (dateCounts[dates[i]] !== totalHabits) {
+            break;
         }
 
+        if (i < dates.length - 1) {
+            const currentDate = new Date(dates[i]);
+            const nextDate = new Date(dates[i + 1]);
+
+            const difference =
+                (nextDate - currentDate) / (1000 * 60 * 60 * 24);
+
+            if (difference !== 1) {
+                break;
+            }
+        }
+
+        streak++;
     }
 
     return streak
