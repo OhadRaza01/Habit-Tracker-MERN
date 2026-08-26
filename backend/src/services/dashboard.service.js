@@ -1,6 +1,6 @@
 import { getDateKey } from "../utils/dateUtil.js";
 
-export const getTodayStats = (habits, logs) => {
+const getTodayStats = (habits, logs) => {
 
     const todayKey = getDateKey(new Date());
 
@@ -27,7 +27,7 @@ export const getTodayStats = (habits, logs) => {
     };
 };
 
-export const getCurrentStreak = (habits, logs) => {
+const getCurrentStreak = (habits, logs) => {
     if (!habits.length) return 0;
 
     const totalHabits = habits.length;
@@ -70,3 +70,5 @@ export const getCurrentStreak = (habits, logs) => {
 
     return streak
 }
+
+export{getTodayStats, getCurrentStreak}
