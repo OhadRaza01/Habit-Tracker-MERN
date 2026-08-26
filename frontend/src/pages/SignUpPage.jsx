@@ -108,7 +108,7 @@ export default function SignupPage() {
                             type="text"
                             placeholder="Enter your full name"
                             required
-                            className="mt-1 w-full rounded-xl border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
+                            className="mt-1 w-full rounded-sm border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
                             onChange={(e) => {
                                 setFullname(e.target.value)
                             }}
@@ -125,7 +125,7 @@ export default function SignupPage() {
                             type="text"
                             placeholder="Enter your username"
                             required
-                            className="mt-1 w-full rounded-xl border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
+                            className="mt-1 w-full rounded-sm border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
                             onChange={(e) => {
                                 setUsername(e.target.value)
                             }}
@@ -142,7 +142,7 @@ export default function SignupPage() {
                             type="email"
                             placeholder="your@example.com"
                             required
-                            className="mt-1 w-full rounded-xl border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
+                            className="mt-1 w-full rounded-sm border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
                             onChange={(e) => {
                                 setEmail(e.target.value)
                             }}
@@ -159,7 +159,7 @@ export default function SignupPage() {
                             type="password"
                             placeholder="Password"
                             required
-                            className="mt-1 w-full rounded-xl border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
+                            className="mt-1 w-full rounded-sm border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
                             onChange={(e) => {
                                 setPassword(e.target.value)
                             }}
@@ -172,7 +172,7 @@ export default function SignupPage() {
                         </label>
                         <label
                             htmlFor="avatar"
-                            className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#8a8a8a] transition-colors hover:border-[#ff5a36] hover:text-[#ff5a36]"
+                            className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-sm border border-dashed border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#8a8a8a] transition-colors hover:border-[#ff5a36] hover:text-[#ff5a36]"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 16V4M12 4l-4 4M12 4l4 4" strokeLinecap="round" strokeLinejoin="round" />
@@ -196,40 +196,18 @@ export default function SignupPage() {
 
                     {loading ?
                         <button
-                            className="w-full rounded-xl bg-[#ff5a36] px-6 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
+                            className="w-full rounded-sm bg-[#ff5a36] px-6 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
                             disabled
                         >
                             Creating Account...
                         </button> :
                         <button
                             type="submit"
-                            className="w-full rounded-xl bg-[#ff5a36] px-6 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
+                            className="w-full rounded-sm bg-[#ff5a36] px-6 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
 
                         >
                             Sign Up
                         </button>}
-
-                    {/* Divider */}
-
-                    <div className="flex items-center gap-3 py-1">
-                        <div className="h-px flex-1 bg-[#eee7db]" />
-                        <span className="text-xs text-[#a3a3a3]">or</span>
-                        <div className="h-px flex-1 bg-[#eee7db]" />
-                    </div>
-
-                    <button
-                        type="button"
-                        // onClick={() => { for later implementation }}
-                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#eee7db] bg-white px-6 py-2 text-sm font-semibold text-[#14151a] shadow-sm transition-colors hover:bg-[#faf7f2]"
-                    >
-                        <svg width="18" height="18" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3h3.87c2.27-2.09 3.58-5.17 3.58-8.82z" />
-                            <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.1A12 12 0 0 0 12 24z" />
-                            <path fill="#FBBC05" d="M5.27 14.28A7.2 7.2 0 0 1 4.89 12c0-.79.14-1.56.38-2.28v-3.1H1.27A12 12 0 0 0 0 12c0 1.94.46 3.77 1.27 5.38l4-3.1z" />
-                            <path fill="#EA4335" d="M12 4.77c1.76 0 3.35.6 4.6 1.79l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.27 6.62l4 3.1C6.22 6.88 8.87 4.77 12 4.77z" />
-                        </svg>
-                        Continue with Google
-                    </button>
 
                     <p className="text-center text-xs text-[#6b6b6b]">
                         Already have an account?{" "}
