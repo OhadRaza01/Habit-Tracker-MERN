@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import axios from "axios"
 import logo from "../assets/logo.png"
+import { Link } from 'react-router-dom'
 
 export default function LogInPage() {
 
@@ -119,7 +120,7 @@ export default function LogInPage() {
                         </button> :
                         <button
                             type="submit"
-                            className="w-full rounded-sm bg-[#ff5a36] px-6 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
+                            className="w-full rounded-sm cursor-pointer bg-[#ff5a36] px-6 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
 
                         >
                             Sign In
@@ -149,9 +150,9 @@ export default function LogInPage() {
 
                     <p className="text-center text-xs text-[#6b6b6b]">
                         Create an account?{" "}
-                        <a href='#signup' className="font-semibold text-[#ff5a36] hover:underline">
+                        <Link to={"/signup"} className="font-semibold text-[#ff5a36] hover:underline">
                             Sign Up
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </form>

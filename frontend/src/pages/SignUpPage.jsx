@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios"
 import logo from "../assets/logo.png"
+import PopUp from "../components/shared/PopUp";
 
 export default function SignupPage() {
     const [avatarName, setAvatarName] = useState("");
@@ -11,6 +12,8 @@ export default function SignupPage() {
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
+    const [showSuccess, setShowSuccess] = useState(false)
+    const navigate = useNavigate()
 
     const validateForm = () => {
 
@@ -63,7 +66,7 @@ export default function SignupPage() {
 
             const response = await axios.post(url, formData);
 
-            console.log(response.data)
+            setShowSuccess(true)
 
             return response.data;
 
@@ -200,7 +203,7 @@ export default function SignupPage() {
                         </button> :
                         <button
                             type="submit"
-                            className="w-full rounded-sm bg-[#ff5a36] px-6 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
+                            className="w-full rounded-sm cursor-pointer bg-[#ff5a36] px-6 py-2 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
 
                         >
                             Sign Up
@@ -208,12 +211,26 @@ export default function SignupPage() {
 
                     <p className="text-center text-xs text-[#6b6b6b]">
                         Already have an account?{" "}
-                        <a to="/login" className="font-semibold text-[#ff5a36] hover:underline">
+                        <Link to="/login" className="font-semibold text-[#ff5a36] hover:underline">
                             Sign In
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </form>
+
+            <PopUp
+                isOpen={showSuccess}
+                onClose={() => setShowSuccess(false)}
+                title="Account created!"
+                message="Your account has been registered successfully. Continue to log in and start tracking your habits."
+                buttonText="Continue"
+                onButtonClick={() => navigate("/login")}
+                icon={
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff5a36" strokeWidth="2.5">
+                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                }
+            />
         </section>
     );
 }
