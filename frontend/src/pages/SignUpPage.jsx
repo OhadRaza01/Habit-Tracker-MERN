@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios"
+import logo from "../assets/logo.png"
 
 export default function SignupPage() {
     const [avatarName, setAvatarName] = useState("");
@@ -60,17 +61,15 @@ export default function SignupPage() {
 
             setLoading(true)
 
-            const response = await axios.post(url, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const response = await axios.post(url, formData);
 
             console.log(response.data)
 
             return response.data;
 
         } catch (error) {
-            setError(error.response.data.message)
-            console.log(error)
+            setError(error.response?.data?.message ||
+                "Something went wrong. Please try again.")
         } finally {
             setLoading(false)
         }
@@ -83,10 +82,8 @@ export default function SignupPage() {
                 className="flex flex-1 flex-col items-center justify-center px-6"
             >
                 <div className="flex flex-col items-center text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-md ring-1 ring-[#f0e9de]">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#ff5a36">
-                            <path d="M4 2h13a3 3 0 0 1 3 3v17l-9.5-5L4 22V2z" />
-                        </svg>
+                    <div className="flex h-12 w-12 rounded-xl shadow-md ring-1 ring-[#f0e9de] overflow-hidden">
+                        <img className='object-cover' width={100} height={100} src={logo} alt="logo" />
                     </div>
                     <h1 className="mt-3 text-xl font-extrabold text-[#14151a] sm:text-2xl">
                         Create new Account
@@ -191,7 +188,7 @@ export default function SignupPage() {
                     </div>
 
                     {error ?
-                        <div className=" w-full text-center text-red-600 text-xs" >{error}</div> :
+                        <div className=" w-full text-center text-red-700 text-xs" >{error}</div> :
                         ""}
 
                     {loading ?
