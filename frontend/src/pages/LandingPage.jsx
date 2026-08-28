@@ -4,6 +4,7 @@ import Navbar from '../components/landing/NavBar'
 import Features from '../components/landing/Features'
 import HowItWorks from '../components/landing/HowItWorks'
 import CTASection from '../components/landing/CTASection'
+import Footer from '../components/landing/Footer'
 
 export default function LandingPage() {
     return (
@@ -13,6 +14,7 @@ export default function LandingPage() {
             <Features />
             <HowItWorks />
             <CTASection />
+            <Footer />
         </div>
     )
 }

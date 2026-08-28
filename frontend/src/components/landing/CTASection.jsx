@@ -4,7 +4,7 @@ import Button from '../shared/Button'
 
 export default function CTASection() {
     return (
-        <section className="relative overflow-hidden bg-[#ff5a36] px-6 py-20 md:px-12">
+        <section id='getstarted' className="relative overflow-hidden bg-[#ff5a36] px-6 py-20 md:px-12">
             <DecorativeCircle size={40} color="#ffffff" className="left-[8%] top-[20%] opacity-80" />
             <DecorativeCircle size={34} color="#c9dcef" className="right-[10%] bottom-[18%] opacity-80" />
             <DecorativeCircle size={28} color="#c9bfe0" className="right-[22%] top-[24%] opacity-70" />
