@@ -2,7 +2,12 @@ import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
 export default function Navbar() {
-    const links = ["Home", "Features", "How it works", "Get started"];
+    const links = [
+        { title: "Home", id: "home" },
+        { title: "Features", id: "features" },
+        { title: "How it works", id: "howitworks" },
+        { title: "Get started", id: "getstarted" }
+    ];
 
     return (
         <nav className="relative z-21 flex items-center justify-between px-6 py-6 md:px-12 ">
@@ -12,15 +17,15 @@ export default function Navbar() {
                 <span className="text-xl font-bold text-white tracking-tight">Habitus</span>
             </Link>
 
-            {/*links*/ }
+            {/*links*/}
             <ul className="hidden lg:flex items-center gap-8">
                 {links.map((link) => (
-                    <li key={link}>
+                    <li key={link.id}>
                         <a
-                            href="#"
+                            href={`#${link.id}`}
                             className="text-[15px] font-medium text-white/90 hover:text-white transition-colors"
                         >
-                            {link}
+                            {link.title}
                         </a>
                     </li>
                 ))}
