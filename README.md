@@ -51,7 +51,7 @@ npm run dev
 
 ## Screenshots
 
-<img width="1903" height="879" alt="image" src="https://github.com/user-attachments/assets/08eb4557-a9d0-47fa-af20-c284583d2608" />
+<img width="1901" height="927" alt="image" src="https://github.com/user-attachments/assets/ab0f6bce-5998-4ef7-aacf-6d625db3ae25" />
 
 ## Purpose
 
