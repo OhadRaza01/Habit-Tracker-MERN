@@ -2,6 +2,7 @@ import React from 'react'
 import Hero from '../components/landing/Hero'
 import Navbar from '../components/landing/NavBar'
 import Features from '../components/landing/Features'
+import HowItWorks from '../components/landing/HowItWorks'
 
 export default function LandingPage() {
     return (
@@ -9,6 +10,7 @@ export default function LandingPage() {
             <Navbar />
             <Hero />
             <Features />
+            <HowItWorks />
         </div>
     )
 }
