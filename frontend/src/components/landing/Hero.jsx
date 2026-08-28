@@ -3,7 +3,7 @@ import Button from "../shared/Button";
 
 export default function Hero() {
     return (
-        <section id="home" className="relative min-h-screen flex items-center overflow-hidden bg-[#ff5a36] pb-24">
+        <section id="home" className="relative min-h-[calc(100vh-88px)] flex items-center overflow-hidden bg-[#ff5a36] pb-24">
 
             <DecorativeCircle size={60} color="#ffffff" className="left-[9%] top-[32%]" />
             <DecorativeCircle size={56} color="#c9bfe0" className="right-[8%] top-[30%]" />

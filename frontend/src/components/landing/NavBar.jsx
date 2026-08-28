@@ -1,20 +1,21 @@
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
+const links = [
+    { title: "Home", id: "home" },
+    { title: "Features", id: "features" },
+    { title: "How it works", id: "howitworks" },
+    { title: "Get started", id: "getstarted" }
+];
+
 export default function Navbar() {
-    const links = [
-        { title: "Home", id: "home" },
-        { title: "Features", id: "features" },
-        { title: "How it works", id: "howitworks" },
-        { title: "Get started", id: "getstarted" }
-    ];
 
     return (
         <nav className="relative z-21 flex items-center justify-between px-6 py-6 md:px-12 ">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
                 <img src={logo} alt="Habitus logo" className="h-8 w-8 shrink-0 object-contain brightness-0 invert" />
-                <span className="text-xl font-bold text-white tracking-tight">Habitus</span>
+                <span className="text-xl font-bold text-white tracking-tight">Habitly</span>
             </Link>
 
             {/*links*/}

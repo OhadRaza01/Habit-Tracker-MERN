@@ -1,13 +1,14 @@
 import React from 'react'
 
+const links = [
+    { title: "Home", id: "home" },
+    { title: "Features", id: "features" },
+    { title: "How it works", id: "howitworks" },
+    { title: "Get started", id: "getstarted" }
+];
+
 export default function Footer() {
 
-    const links = [
-        { title: "Home", id: "home" },
-        { title: "Features", id: "features" },
-        { title: "How it works", id: "howitworks" },
-        { title: "Get started", id: "getstarted" }
-    ];
 
     return (
         <footer className="bg-black px-6 py-10 text-white">
@@ -15,8 +16,7 @@ export default function Footer() {
 
                 <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
 
-                    {/* Logo / Brand */}
-                    <div>
+                    <div className='text-center md:text-left'>
                         <h2 className="text-2xl font-bold">Habitly</h2>
                         <p className="mt-2 text-sm text-white/60">
                             Build better habits, one day at a time.
@@ -24,7 +24,7 @@ export default function Footer() {
                     </div>
 
                     {/* Links */}
-                    <div className="flex flex-wrap gap-6 text-sm text-white/70">
+                    <div className="flex flex-wrap gap-6 text-sm text-white/70 text-center md:text-left">
 
                         {
                             links.map((link) => {
