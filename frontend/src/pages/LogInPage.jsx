@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import axios from "axios"
 import logo from "../assets/logo.png"
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function LogInPage() {
 
@@ -9,6 +10,8 @@ export default function LogInPage() {
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
+    const {user , setUser} = useAuth()
 
     function validateForm() {
 
@@ -39,14 +42,34 @@ export default function LogInPage() {
 
             setLoading(true)
 
-            const response = await axios.post(url, payload)
-            
+            const response = await axios.post(
+                url,
+                payload,
+                {
+                    withCredentials: true
+                }
+
+            )
+
+            const userResponse = await axios.get(
+                "http://localhost:8000/api/v1/users/me",
+                {
+                    withCredentials: true
+                }
+            )
+
+            setUser(userResponse.data.data)
+
+            if (response.data) {
+                navigate("/dashboard")
+            }
+
             return response.data
 
         } catch (error) {
-            
-            setError(error.response?.data?.message || "Something went wrong please try again" )
-            
+
+            setError(error.response?.data?.message || "Something went wrong please try again")
+
         } finally {
             setLoading(false)
         }
