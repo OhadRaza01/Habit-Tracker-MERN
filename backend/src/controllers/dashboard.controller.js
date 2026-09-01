@@ -13,7 +13,7 @@ const getdashboard = asyncHandler(async (req, res) => {
 
     const logs = await HabitLog.find({
         owner: req.user.id
-    }).sort({date : 1})
+    }).sort({ date: 1 })
 
     const todayStats = getTodayStats(habits, logs)
     const currentStreak = getCurrentStreak(habits, logs)
@@ -24,8 +24,11 @@ const getdashboard = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 {
-                    ...todayStats,
-                    currentStreak
+                    habits: habits,
+                    statistics: {
+                        ...todayStats,
+                        currentStreak
+                    }
                 },
                 "dashboard details fetched successfully"
             )
