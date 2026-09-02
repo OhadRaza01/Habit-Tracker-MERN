@@ -1,30 +1,84 @@
 import StatCard from "../components/dashboard/StatCard";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "../../src/contexts/AuthContext"
+import axios from "axios";
 
-const initialHabits = [
-    { id: 1, name: "Morning run", streak: 12, completed: true },
-    { id: 2, name: "Read 10 pages", streak: 5, completed: false },
-    { id: 3, name: "Drink 8 glasses of water", streak: 21, completed: false },
-    { id: 4, name: "Meditate", streak: 8, completed: false },
-    { id: 5, name: "Meditate", streak: 8, completed: false },
-    { id: 6, name: "Meditate", streak: 8, completed: false }
-];
 
 export default function DashboardPage() {
-    const [habits, setHabits] = useState(initialHabits);
+    const [habits, setHabits] = useState(null);
+    const [statistics, setStatistics] = useState({
+        completed: 0,
+        totalHabits: 0,
+        remaining: 0,
+        completionRate: 0,
+        currentStreak: 0
+    })
 
-    const toggleHabit = (id) => {
-        setHabits((prev) =>
-            prev.map((habit) =>
-                habit.id === id ? { ...habit, completed: !habit.completed } : habit
+    const fetchDashboardStatistics = useCallback(async () => {
+        const url = "http://localhost:8000/api/v1/dashboard/"
+
+        try {
+            const response = await axios.get(url, {
+                withCredentials: true
+            })
+
+            const { habits, statistics } = response.data.data
+
+            setStatistics(statistics)
+            setHabits(habits)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchDashboardStatistics()
+    }, [fetchDashboardStatistics])
+
+    async function toggleHabit(habitId, isCompleted) {
+
+        setHabits((prevHabits) =>
+            prevHabits.map((habit) =>
+                habit._id === habitId
+                    ? { ...habit, completed: !isCompleted }
+                    : habit
             )
         );
-    };
 
-    const completedCount = habits.filter((h) => h.completed).length;
-    const totalCount = habits.length;
-    const completionRate = Math.round((completedCount / totalCount) * 100);
-    const currentStreak = Math.max(...habits.map((h) => h.streak));
+        setStatistics((prev) => {
+            const completed = isCompleted ? prev.completed - 1 : prev.completed + 1
+            const totalHabits = prev.totalHabits
+            const remaining = totalHabits - completed
+            const completionRate = totalHabits > 0
+                ? Math.round((completed / totalHabits) * 100)
+                : 0
+
+            return {
+                ...prev,
+                completed,
+                remaining,
+                completionRate
+            }
+        })
+
+        try {
+            const url = `http://localhost:8000/api/v1/habit-logs/${habitId}`
+
+            if (isCompleted) {
+                await axios.delete(url, { withCredentials: true })
+            } else {
+                await axios.post(url, {}, { withCredentials: true })
+            }
+
+            fetchDashboardStatistics()
+
+        } catch (error) {
+            console.log(error.response?.data?.message || "Something went wrong please try again")
+
+            fetchDashboardStatistics()
+        }
+    }
 
     return (
         <div>
@@ -32,7 +86,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
                 <StatCard
                     label="Current streak"
-                    value={`${currentStreak} days`}
+                    value={`${statistics?.currentStreak} days`}
                     accent
                     icon={
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -43,7 +97,7 @@ export default function DashboardPage() {
                 />
                 <StatCard
                     label="Habits completed today"
-                    value={`${completedCount}/${totalCount}`}
+                    value={`${statistics?.completed}/${statistics?.totalHabits}`}
                     icon={
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M4 6l2 2 3-3" strokeLinecap="round" strokeLinejoin="round" />
@@ -55,7 +109,7 @@ export default function DashboardPage() {
                 />
                 <StatCard
                     label="Completion rate"
-                    value={`${completionRate}%`}
+                    value={`${statistics?.completionRate}%`}
                     icon={
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <line x1="19" y1="5" x2="5" y2="19" strokeLinecap="round" />
@@ -72,11 +126,11 @@ export default function DashboardPage() {
                 <p className="mt-1 text-sm text-[#8a8a8a]">Mark each habit off as you complete it.</p>
 
                 <div className="mt-5 space-y-3">
-                    {habits.map((habit) => (
+                    {habits && habits.map((habit) => (
                         <button
-                            key={habit.id}
+                            key={habit._id}
                             type="button"
-                            onClick={() => toggleHabit(habit.id)}
+                            onClick={() => toggleHabit(habit._id, habit.completed)}
                             className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-left transition-colors ${habit.completed
                                 ? "border-[#ff5a36]/20 bg-[#fff3ee]"
                                 : "border-[#eee7db] bg-[#faf7f2] hover:border-[#ff5a36]/30"

@@ -18,8 +18,6 @@ const getdashboard = asyncHandler(async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Build a Set of habit IDs that have a log dated today, using the
-    // logs we already fetched — no extra DB query needed.
     const completedTodayHabitIds = new Set(
         logs
             .filter((log) => {
@@ -30,8 +28,6 @@ const getdashboard = asyncHandler(async (req, res) => {
             .map((log) => log.habit.toString())
     );
 
-    // Attach `completed` onto each habit before sending it to the client.
-    // .toObject() so we're spreading a plain object, not a Mongoose document.
     const habitsWithCompletion = habits.map((habit) => ({
         ...habit.toObject(),
         completed: completedTodayHabitIds.has(habit._id.toString())
