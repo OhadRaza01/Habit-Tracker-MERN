@@ -32,7 +32,7 @@ export default function LogInPage() {
             return
         }
 
-        const url = "http://localhost:8000/api/v1/users/login"
+        const url = `${import.meta.env.VITE_API_URL}/users/login`
         const payload = {
             email,
             password
@@ -52,7 +52,7 @@ export default function LogInPage() {
             )
 
             const userResponse = await axios.get(
-                "http://localhost:8000/api/v1/users/me",
+                `${import.meta.env.VITE_API_URL}/users/me`,
                 {
                     withCredentials: true
                 }

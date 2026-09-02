@@ -15,7 +15,7 @@ export default function DashboardPage() {
     })
 
     const fetchDashboardStatistics = useCallback(async () => {
-        const url = "http://localhost:8000/api/v1/dashboard/"
+        const url = `${import.meta.env.VITE_API_URL}/dashboard/`
 
         try {
             const response = await axios.get(url, {
@@ -63,7 +63,7 @@ export default function DashboardPage() {
         })
 
         try {
-            const url = `http://localhost:8000/api/v1/habit-logs/${habitId}`
+            const url = `${import.meta.env.VITE_API_URL}/habit-logs/${habitId}`
 
             if (isCompleted) {
                 await axios.delete(url, { withCredentials: true })

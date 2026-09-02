@@ -58,7 +58,7 @@ export default function SignupPage() {
             formData.append('avatar', file);
         }
 
-        const url = "http://localhost:8000/api/v1/users/register";
+        const url = `${import.meta.env.VITE_API_URL}/users/register`;
 
         try {
 
