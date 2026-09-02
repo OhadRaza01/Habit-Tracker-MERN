@@ -33,42 +33,32 @@ const getCurrentStreak = (habits, logs) => {
     const totalHabits = habits.length;
 
     const dateCounts = logs.reduce((acc, log) => {
-
         const dateOnly = getDateKey(log.date);
-
         acc[dateOnly] = (acc[dateOnly] || 0) + 1;
+        return acc;
+    }, {});
 
-        return acc
-    }, {})
+    const cursor = new Date();
+    const todayKey = getDateKey(cursor);
+
+    if (dateCounts[todayKey] !== totalHabits) {
+        cursor.setDate(cursor.getDate() - 1);
+    }
 
     let streak = 0;
 
-    const dates = Object.keys(dateCounts).sort(
-        (a, b) => new Date(a) - new Date(b)
-    );
+    while (true) {
+        const key = getDateKey(cursor);
 
-    for (let i = dates.length - 1; i >= 0; i--) {
-
-        if (dateCounts[dates[i]] !== totalHabits) {
+        if (dateCounts[key] !== totalHabits) {
             break;
         }
 
-        if (i < dates.length - 1) {
-            const currentDate = new Date(dates[i]);
-            const nextDate = new Date(dates[i + 1]);
-
-            const difference =
-                (nextDate - currentDate) / (1000 * 60 * 60 * 24);
-
-            if (difference !== 1) {
-                break;
-            }
-        }
-
         streak++;
+        cursor.setDate(cursor.getDate() - 1);
     }
 
-    return streak
-}
+    return streak;
+};
 
-export{getTodayStats, getCurrentStreak}
+export { getTodayStats, getCurrentStreak }
