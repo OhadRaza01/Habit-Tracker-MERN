@@ -3,7 +3,7 @@ export default function ProgressRow({ label, value, total }) {
 
     return (
         <div>
-            <div className="mb-1 flex items-center justify-between text-sm text-[#8a8a8a]">
+            <div className="mb-1 flex items-center justify-between text-xs text-[#8a8a8a] sm:text-sm">
                 <span>{label}</span>
                 <span className="font-medium text-[#14151a]">{value}/{total}</span>
             </div>

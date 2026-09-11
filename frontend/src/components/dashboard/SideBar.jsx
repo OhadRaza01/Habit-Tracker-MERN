@@ -51,13 +51,27 @@ const navItems = [
     },
 ];
 
-export default function SideBar({ onLogout }) {
+export default function SideBar({ onLogout, onClose }) {
     return (
-        <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-[#eee7db] bg-white">
+        <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-[#eee7db] bg-white shadow-lg md:shadow-none">
             {/* Logo */}
-            <div className="flex items-center gap-2 px-6 py-6">
-                <img src={logo} alt="Habitus logo" className="h-8 w-8 object-contain" />
-                <span className="text-lg font-bold text-[#14151a]">Habitus</span>
+            <div className="flex items-center justify-between gap-2 px-6 py-6">
+                <div className="flex items-center gap-2">
+                    <img src={logo} alt="Habitus logo" className="h-8 w-8 object-contain" />
+                    <span className="text-lg font-bold text-[#14151a]">Habitus</span>
+                </div>
+
+                <button
+                    type="button"
+                    aria-label="Close sidebar"
+                    onClick={onClose}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-[#6b6b6b] transition-colors hover:bg-[#faf7f2] hover:text-[#14151a] md:hidden"
+                >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" />
+                        <line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round" />
+                    </svg>
+                </button>
             </div>
 
             {/* Nav links */}
@@ -67,6 +81,7 @@ export default function SideBar({ onLogout }) {
                         key={item.label}
                         to={item.to}
                         end={item.end}
+                        onClick={onClose}
                         className={({ isActive }) =>
                             `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${isActive
                                 ? "bg-[#ff5a36]/10 text-[#ff5a36]"
@@ -80,13 +95,15 @@ export default function SideBar({ onLogout }) {
                 ))}
             </nav>
 
-            
             {/*Logout*/}
 
             <div className="border-t border-[#eee7db] px-4 py-4">
                 <button
                     type="button"
-                    onClick={onLogout}
+                    onClick={() => {
+                        onClose?.();
+                        onLogout();
+                    }}
                     className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#6b6b6b] transition-colors hover:bg-[#fff3ee] hover:text-[#ff5a36]"
                 >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

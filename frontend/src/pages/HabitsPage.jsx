@@ -228,10 +228,10 @@ export default function HabitsPage() {
 
     return (
         <div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-xl font-bold text-[#14151a]">Habits</h1>
-                    <p className="mt-1 text-sm text-[#8a8a8a]">
+                    <h1 className="text-xl font-bold text-[#14151a] sm:text-2xl">Habits</h1>
+                    <p className="mt-1 text-xs text-[#8a8a8a] sm:text-sm">
                         {habits.length} habit{habits.length !== 1 ? "s" : ""} tracked — tap any habit for details
                     </p>
                 </div>
@@ -301,11 +301,11 @@ export default function HabitsPage() {
                             tabIndex={0}
                             onClick={() => setSelectedHabit(habit)}
                             onKeyDown={(e) => e.key === "Enter" && setSelectedHabit(habit)}
-                            className="flex cursor-pointer items-center justify-between rounded-2xl border border-[#eee7db] bg-white p-5 transition-colors hover:border-[#ff5a36]/30 hover:bg-[#fff8f5]"
+                            className="flex cursor-pointer items-center justify-between rounded-2xl border border-[#eee7db] bg-white p-4 transition-colors hover:border-[#ff5a36]/30 hover:bg-[#fff8f5] sm:p-5"
                         >
                             <div>
                                 <h3 className="text-sm font-semibold text-[#14151a]">{habit.name}</h3>
-                                <div className="mt-1 flex items-center gap-4 text-xs text-[#8a8a8a]">
+                                <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#8a8a8a] sm:gap-4 sm:text-xs">
                                     <span className="flex items-center gap-1">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-1-.5-2-1-2 1 4-1 5-2 5a2.5 2.5 0 0 1-2.5-2.5c0-2 1.5-2.5 1.5-5.5C13.5 2.5 12.5 2 12 2z" />
@@ -316,8 +316,8 @@ export default function HabitsPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4">
-                                <div className="h-2 w-24 overflow-hidden rounded-full bg-[#f3ede4]">
+                            <div className="flex items-center gap-2 sm:gap-4">
+                                <div className="hidden h-2 w-20 overflow-hidden rounded-full bg-[#f3ede4] sm:block">
                                     <div
                                         className="h-full rounded-full bg-[#ff5a36]"
                                         style={{ width: `${habit.completionRate}%` }}
@@ -409,7 +409,7 @@ export default function HabitsPage() {
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+                        className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl sm:p-6"
                     >
                         <div className="flex items-start justify-between">
                             <h2 className="text-lg font-bold text-[#14151a]">{selectedHabit.name}</h2>
