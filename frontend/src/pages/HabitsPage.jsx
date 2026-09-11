@@ -11,6 +11,8 @@ export default function HabitsPage() {
     const [newHabitName, setNewHabitName] = useState("");
     const [selectedHabit, setSelectedHabit] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [loadingArchived, setLoadingArchived] = useState(true);
+    const [archivedHabits, setArchivedHabits] = useState([]);
     const [error, setError] = useState("");
 
     const getDateKey = (date) =>
@@ -38,6 +40,7 @@ export default function HabitsPage() {
     const normalizeHabit = (habit) => ({
         id: habit._id || habit.id,
         name: habit.name || "Unnamed habit",
+        isArchived: Boolean(habit.isArchived),
         streak: 0,
         bestStreak: 0,
         completionRate: 0,
@@ -47,77 +50,86 @@ export default function HabitsPage() {
         weekLog: [false, false, false, false, false, false, false],
     });
 
+    const fetchHabits = async () => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const response = await axios.get(`${API_URL}/habits`, {
+                withCredentials: true,
+            });
+
+            const habitList = Array.isArray(response?.data?.data) ? response.data.data : [];
+
+            const habitsWithDetails = await Promise.all(
+                habitList.map(async (habit) => {
+                    const [statsResult, historyResult] = await Promise.allSettled([
+                        axios.get(`${API_URL}/habit-logs/${habit._id}/habit-stats`, {
+                            withCredentials: true,
+                        }),
+                        axios.get(`${API_URL}/habit-logs/${habit._id}`, {
+                            withCredentials: true,
+                        }),
+                    ]);
+
+                    const stats = statsResult.status === "fulfilled"
+                        ? statsResult.value?.data?.data || {}
+                        : {};
+
+                    const history = historyResult.status === "fulfilled"
+                        ? historyResult.value?.data?.data || []
+                        : [];
+
+                    return {
+                        ...normalizeHabit(habit),
+                        streak: stats.currentStreak ?? 0,
+                        bestStreak: stats.bestStreak ?? 0,
+                        completionRate: stats.completionRate ?? 0,
+                        daysTracked: stats.totalDaysTracked ?? 0,
+                        totalDaysTracked: stats.totalDaysTracked ?? 0,
+                        totalCompletions: stats.totalCompletions ?? 0,
+                        weekLog: buildWeekLog(history),
+                    };
+                })
+            );
+
+            setHabits(habitsWithDetails);
+        } catch (err) {
+            console.error("Failed to fetch habits:", err);
+            setError(
+                err?.response?.data?.message ||
+                "Unable to load habits right now. Please try again."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchArchivedHabits = async () => {
+        try {
+            setLoadingArchived(true);
+
+            const response = await axios.get(`${API_URL}/habits/archived`, {
+                withCredentials: true,
+            });
+
+            const habitList = Array.isArray(response?.data?.data) ? response.data.data : [];
+
+            setArchivedHabits(habitList.map((habit) => normalizeHabit(habit)));
+        } catch (err) {
+            console.error("Failed to fetch archived habits:", err);
+            setError(
+                err?.response?.data?.message ||
+                "Unable to load archived habits right now. Please try again."
+            );
+        } finally {
+            setLoadingArchived(false);
+        }
+    };
+
     useEffect(() => {
-        let isMounted = true;
-
-        const fetchHabits = async () => {
-            try {
-                setLoading(true);
-                setError("");
-
-                const response = await axios.get(`${API_URL}/habits`, {
-                    withCredentials: true,
-                });
-
-                if (!isMounted) {
-                    return;
-                }
-
-                const habitList = Array.isArray(response?.data?.data) ? response.data.data : [];
-
-                const habitsWithDetails = await Promise.all(
-                    habitList.map(async (habit) => {
-                        const [statsResult, historyResult] = await Promise.allSettled([
-                            axios.get(`${API_URL}/habit-logs/${habit._id}/habit-stats`, {
-                                withCredentials: true,
-                            }),
-                            axios.get(`${API_URL}/habit-logs/${habit._id}`, {
-                                withCredentials: true,
-                            }),
-                        ]);
-
-                        const stats = statsResult.status === "fulfilled"
-                            ? statsResult.value?.data?.data || {}
-                            : {};
-
-                        const history = historyResult.status === "fulfilled"
-                            ? historyResult.value?.data?.data || []
-                            : [];
-
-                        return {
-                            ...normalizeHabit(habit),
-                            streak: stats.currentStreak ?? 0,
-                            bestStreak: stats.bestStreak ?? 0,
-                            completionRate: stats.completionRate ?? 0,
-                            daysTracked: stats.totalDaysTracked ?? 0,
-                            totalDaysTracked: stats.totalDaysTracked ?? 0,
-                            totalCompletions: stats.totalCompletions ?? 0,
-                            weekLog: buildWeekLog(history),
-                        };
-                    })
-                );
-
-                setHabits(habitsWithDetails);
-            } catch (err) {
-                if (isMounted) {
-                    console.error("Failed to fetch habits:", err);
-                    setError(
-                        err?.response?.data?.message ||
-                        "Unable to load habits right now. Please try again."
-                    );
-                }
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
-            }
-        };
-
         fetchHabits();
-
-        return () => {
-            isMounted = false;
-        };
+        fetchArchivedHabits();
     }, []);
 
     const handleAddHabit = async (e) => {
@@ -158,12 +170,58 @@ export default function HabitsPage() {
             });
 
             setHabits((prev) => prev.filter((habit) => habit.id !== id));
+            setArchivedHabits((prev) => prev.filter((habit) => habit.id !== id));
             setSelectedHabit((prev) => (prev?.id === id ? null : prev));
         } catch (err) {
             console.error("Failed to delete habit:", err);
             setError(
                 err?.response?.data?.message ||
                 "Unable to delete this habit. Please try again."
+            );
+        }
+    };
+
+    const handleToggleArchive = async (id, e) => {
+        e.stopPropagation();
+
+        try {
+            setError("");
+
+            const response = await axios.patch(
+                `${API_URL}/habits/${id}/toggle-status`,
+                {},
+                { withCredentials: true }
+            );
+
+            const toggledHabit = response?.data?.data || {};
+            const isNowArchived = Boolean(toggledHabit.isArchived);
+
+            setHabits((prev) => {
+                const filtered = prev.filter((habit) => habit.id !== id);
+
+                if (isNowArchived) {
+                    return filtered;
+                }
+
+                return [normalizeHabit(toggledHabit), ...filtered];
+            });
+
+            setArchivedHabits((prev) => {
+                const filtered = prev.filter((habit) => habit.id !== id);
+
+                if (!isNowArchived) {
+                    return filtered;
+                }
+
+                return [normalizeHabit(toggledHabit), ...filtered];
+            });
+
+            setSelectedHabit((prev) => (prev?.id === id ? null : prev));
+        } catch (err) {
+            console.error("Failed to update archive status:", err);
+            setError(
+                err?.response?.data?.message ||
+                "Unable to update this habit. Please try again."
             );
         }
     };
@@ -293,6 +351,56 @@ export default function HabitsPage() {
                 </div>
             )}
 
+            {!loadingArchived && (
+                <div className="mt-8 rounded-2xl border border-[#eee7db] bg-white p-5">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-bold text-[#14151a]">Archived habits</h2>
+                        <span className="rounded-full bg-[#faf7f2] px-2.5 py-1 text-xs font-semibold text-[#8a8a8a]">
+                            {archivedHabits.length}
+                        </span>
+                    </div>
+
+                    {loadingArchived ? (
+                        <div className="mt-4 text-sm text-[#8a8a8a]">Loading archived habits...</div>
+                    ) : archivedHabits.length === 0 ? (
+                        <div className="mt-4 rounded-xl border border-dashed border-[#eee7db] bg-[#faf7f2] p-5 text-center text-sm text-[#8a8a8a]">
+                            No archived habits yet.
+                        </div>
+                    ) : (
+                        <div className="mt-4 space-y-3">
+                            {archivedHabits.map((habit) => (
+                                <div
+                                    key={habit.id}
+                                    className="flex items-center justify-between rounded-xl border border-[#eee7db] bg-[#faf7f2] p-4"
+                                >
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-[#14151a]">{habit.name}</h3>
+                                        <p className="mt-1 text-xs text-[#8a8a8a]">Archived habit</p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleToggleArchive(habit.id, e)}
+                                            className="rounded-xl bg-[#ff5a36] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#ff5a36]/90"
+                                        >
+                                            Restore
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleDelete(habit.id, e)}
+                                            className="rounded-xl border border-[#ff5a36]/30 px-3 py-2 text-xs font-semibold text-[#ff5a36] transition-colors hover:bg-[#fff3ee]"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Habit detail modal */}
             {selectedHabit && (
                 <div
@@ -364,13 +472,23 @@ export default function HabitsPage() {
                             </div>
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={(e) => handleDelete(selectedHabit.id, e)}
-                            className="mt-6 w-full rounded-xl border border-[#ff5a36]/30 px-4 py-2.5 text-sm font-semibold text-[#ff5a36] transition-colors hover:bg-[#fff3ee]"
-                        >
-                            Delete habit
-                        </button>
+                        <div className="mt-6 space-y-3">
+                            <button
+                                type="button"
+                                onClick={(e) => handleToggleArchive(selectedHabit.id, e)}
+                                className="w-full rounded-xl bg-[#ff5a36] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#ff5a36]/90"
+                            >
+                                {selectedHabit.isArchived ? "Move back to active habits" : "Archive current habit"}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={(e) => handleDelete(selectedHabit.id, e)}
+                                className="w-full rounded-xl border border-[#ff5a36]/30 px-4 py-2.5 text-sm font-semibold text-[#ff5a36] transition-colors hover:bg-[#fff3ee]"
+                            >
+                                Delete habit
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
