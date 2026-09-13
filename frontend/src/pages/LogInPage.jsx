@@ -134,7 +134,7 @@ export default function LogInPage() {
                                 type="button"
                                 aria-label={showPassword ? "Hide password" : "Show password"}
                                 onClick={() => setShowPassword((prev) => !prev)}
-                                className="absolute inset-y-0 right-3 flex items-center justify-center text-[#8a8a8a] transition-colors hover:text-[#f96c4c]"
+                                className="absolute inset-y-0 right-3 flex items-center justify-center text-[#bfbfbf] transition-colors hover:text-[#f96c4c]"
                             >
                                 {showPassword ? (
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -148,6 +148,14 @@ export default function LogInPage() {
                                         <path d="M4 4l16 16" />
                                     </svg>
                                 )}
+                            </button>
+                        </div>
+                        <div className="mt-1 flex justify-end">
+                            <button
+                                type="button"
+                                className="text-[11px] md:text-xs font-medium text-[#ff5a36] hover:underline"
+                            >
+                                Forgot password?
                             </button>
                         </div>
                     </div>
