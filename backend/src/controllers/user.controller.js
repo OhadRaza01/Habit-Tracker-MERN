@@ -95,6 +95,13 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User not found.")
     }
 
+    if (user.provider === "google") {
+        throw new ApiError(
+            400,
+            "This account was created using Google Sign-In. Please continue with Google."
+        )
+    }
+
     const isPasswordValid = await user.isPasswordCorrect(password)
 
     if (!isPasswordValid) {
