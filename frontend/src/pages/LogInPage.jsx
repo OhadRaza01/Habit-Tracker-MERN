@@ -11,7 +11,7 @@ export default function LogInPage() {
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
-    const {user , setUser} = useAuth()
+    const { user, setUser } = useAuth()
 
     function validateForm() {
 
@@ -158,7 +158,9 @@ export default function LogInPage() {
 
                     <button
                         type="button"
-                        // onClick={() => { for later implementation }}
+                        onClick={() => {
+                            window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`
+                        }}
                         className="flex w-full items-center justify-center gap-2 rounded-sm border border-[#eee7db] bg-white px-6 py-2 text-sm font-semibold text-[#14151a] shadow-sm transition-colors hover:bg-[#faf7f2]"
                     >
                         <svg width="18" height="18" viewBox="0 0 24 24">
