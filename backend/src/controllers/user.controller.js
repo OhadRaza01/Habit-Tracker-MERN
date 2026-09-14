@@ -1,8 +1,10 @@
+import crypto from "crypto";
 import asyncHandler from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { uploadOnCloudinary } from "../utils/fileUpload.js"
 import { User } from "../models/user.model.js"
+import { sendPasswordResetEmail } from "../utils/sendEmail.js";
 
 const options = {
     httpOnly: true,
@@ -202,4 +204,99 @@ const resetPassword = asyncHandler(async (req, res) => {
         )
 })
 
-export { registerUser, loginUser, logoutUser, getCurrentUser, resetPassword }
+const forgotPassword = asyncHandler(async (req, res) => {
+
+    const { email } = req.body
+
+    if (!email) {
+        throw new ApiError(400, "Email is required.")
+    }
+
+    const user = await User.findOne({ email })
+
+    if (!user) {
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    {},
+                    "If that email is registered, a reset link has been sent."
+                )
+            )
+    }
+
+    // 1. Raw token generate karo (ye email mein jayega)
+    const rawToken = crypto.randomBytes(32).toString("hex");
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(rawToken)
+        .digest("hex")
+
+    user.resetPasswordToken = hashedToken
+    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000
+    await user.save({ validateBeforeSave: false })
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${rawToken}`
+
+    await sendPasswordResetEmail(user.email, resetLink)
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "If that email is registered, a reset link has been sent."
+            )
+        )
+})
+
+const resetForgottenPassword = asyncHandler(async (req, res) => {
+
+    const { token } = req.params
+    const { newPassword, confirmPassword } = req.body
+
+    if (!newPassword || !confirmPassword) {
+        throw new ApiError(400, "New password and confirm password are required.")
+    }
+
+    if (newPassword !== confirmPassword) {
+        throw new ApiError(400, "New password and confirm password do not match.")
+    }
+
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex")
+
+    const user = await User.findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: Date.now() }
+    })
+
+    if (!user) {
+        throw new ApiError(400, "Reset link is invalid or has expired. Please request a new one.")
+    }
+
+    user.password = newPassword
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpires = undefined
+
+    await user.save()
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Password reset successfully. You can now log in."
+            )
+        )
+})
+
+export { registerUser, loginUser, logoutUser, getCurrentUser, resetPassword, forgotPassword,
+    resetForgottenPassword
+ }
