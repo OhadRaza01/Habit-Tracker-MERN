@@ -9,6 +9,8 @@ import LandingPage from './pages/LandingPage.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import OAuthSuccess from './pages/OAuthSuccess.jsx'
 import Dashboard from './pages/Dashboard.jsx'
+import ForgotPasswordPage from './pages/FogotPasswordPage.jsx'
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -18,6 +20,8 @@ const router = createBrowserRouter(
       <Route path="/login" element={<LogInPage />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/oauth-success" element={<OAuthSuccess />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
     </Route>
   )
 )

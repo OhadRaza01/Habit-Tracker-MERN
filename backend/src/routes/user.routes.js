@@ -18,7 +18,7 @@ router.route("/forgot-password").post(
     forgotPassword
 )
 
-router.route("/reset-forgotten-password").post(
+router.route("/reset-forgotten-password/:token").post(
     resetForgottenPassword
 )
 
