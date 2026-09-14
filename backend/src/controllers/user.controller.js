@@ -170,4 +170,36 @@ const getCurrentUser = asyncHandler(async (req, res) => {
         )
 })
 
-export { registerUser, loginUser, logoutUser, getCurrentUser }
+const resetPassword = asyncHandler(async (req, res) => {
+
+    const { newPassword, confirmPassword } = req.body
+
+    if (!newPassword || !confirmPassword) {
+        throw new ApiError(400, "New password and confirm password are required.")
+    }
+
+    if (newPassword !== confirmPassword) {
+        throw new ApiError(400, "New password and confirm password do not match.")
+    }
+
+    const user = await User.findById(req.user._id)
+
+    if (!user) {
+        throw new ApiError(404, "User not found.")
+    }
+
+    user.password = newPassword
+    await user.save()
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Password reset successfully."
+            )
+        )
+})
+
+export { registerUser, loginUser, logoutUser, getCurrentUser, resetPassword }
