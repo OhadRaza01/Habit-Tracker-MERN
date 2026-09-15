@@ -12,7 +12,8 @@ const createHabit = asyncHandler(async (req, res) => {
         category,
         frequency,
         target,
-        reminderTime
+        reminderTime,
+        startDate
     } = req.body;
 
     if (!name) {
@@ -26,6 +27,7 @@ const createHabit = asyncHandler(async (req, res) => {
         frequency,
         target,
         reminderTime,
+        startDate,
         owner: req.user._id
     });
 
