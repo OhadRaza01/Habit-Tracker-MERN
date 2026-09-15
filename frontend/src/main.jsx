@@ -22,6 +22,7 @@ const router = createBrowserRouter(
       <Route path="/oauth-success" element={<OAuthSuccess />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+      <Route path='dashboard' element={<Dashboard />} />
     </Route>
   )
 )
