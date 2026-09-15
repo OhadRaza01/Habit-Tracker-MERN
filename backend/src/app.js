@@ -29,4 +29,4 @@ app.use("/api/v1/habit-logs" , habitlogRouter)
 app.use("/api/v1/dashboard",dashboardRouter)
 app.use("/api/v1/auth",authRouter)
 
-export {app}
+export default app
