@@ -3,6 +3,7 @@ import { create } from "zustand"
 
 const apiUrl = import.meta.env.VITE_API_URL
 const palette = ["bg-[#fff0e8]", "bg-[#f2efff]", "bg-[#eaf7fb]", "bg-[#fff7df]"]
+const STALE_MS = 60 * 1000 // how long cached data is considered "fresh" (tune as needed)
 
 const dateFormatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Karachi",
@@ -43,14 +44,21 @@ const normalizeHabit = (habit, index, logs = [], dateKeys = getWeekDateKeys()) =
 
 const requestConfig = { withCredentials: true }
 
-export const useHabitStore = create((set) => ({
+export const useHabitStore = create((set, get) => ({
     habits: [],
     loading: false,
     error: null,
     habitStats: {},
     dashboardStats: null,
+    lastFetched: null,
+    pendingToggles: new Set(), // habit ids currently mid-toggle, so UI can disable the button
 
-    fetchHabits: async () => {
+    // Pass force=true to bypass the cache (e.g. a manual refresh button)
+    fetchHabits: async (force = false) => {
+        const { lastFetched, habits } = get()
+        const isFresh = !force && lastFetched && habits.length && Date.now() - lastFetched < STALE_MS
+        if (isFresh) return
+
         set({ loading: true, error: null })
         try {
             const dateKeys = getWeekDateKeys()
@@ -60,37 +68,84 @@ export const useHabitStore = create((set) => ({
             ])
             const dashboardData = dashboardResponse.data.data
             const rawHabits = [...dashboardData.habits, ...archivedResponse.data.data]
+
+            // NOTE: this fires one log request per habit (N+1). Fine for a handful of
+            // habits, but if this becomes slow, replace with a single backend endpoint
+            // that joins habits + this week's logs in one query (e.g. Mongo $lookup)
+            // and drop this Promise.all entirely.
             const habitsWithLogs = await Promise.all(rawHabits.map(async (habit) => {
                 const historyResponse = await axios.get(`${apiUrl}/habit-logs/${habit._id}`, requestConfig)
                 return { habit, logs: historyResponse.data.data }
             }))
-            const activeHabits = habitsWithLogs.filter(({ habit }) => !habit.isArchived).map(({ habit, logs }, index) => normalizeHabit(habit, index, logs, dateKeys))
-            const archivedHabits = habitsWithLogs.filter(({ habit }) => habit.isArchived).map(({ habit, logs }, index) => normalizeHabit(habit, activeHabits.length + index, logs, dateKeys))
-            set({ habits: [...activeHabits, ...archivedHabits], dashboardStats: dashboardData.statistics, loading: false })
+
+            const activeHabits = habitsWithLogs
+                .filter(({ habit }) => !habit.isArchived)
+                .map(({ habit, logs }, index) => normalizeHabit(habit, index, logs, dateKeys))
+            const archivedHabits = habitsWithLogs
+                .filter(({ habit }) => habit.isArchived)
+                .map(({ habit, logs }, index) => normalizeHabit(habit, activeHabits.length + index, logs, dateKeys))
+
+            set({
+                habits: [...activeHabits, ...archivedHabits],
+                dashboardStats: dashboardData.statistics,
+                loading: false,
+                lastFetched: Date.now(),
+            })
         } catch (error) {
             set({ loading: false, error: error.response?.data?.message || "Unable to load habits." })
         }
     },
 
+    // Optimistic: UI updates instantly, network call happens after, rolls back on failure
     toggleHabit: async (habitId, dayIndex) => {
-        const habit = useHabitStore.getState().habits.find((item) => item.id === habitId)
+        const habit = get().habits.find((item) => item.id === habitId)
         if (!habit) return false
+        if (get().pendingToggles.has(habitId)) return false // ignore double-taps mid-request
 
-        const isCompleted = habit.completedDays[dayIndex]
+        const wasCompleted = habit.completedDays[dayIndex]
+
+        set((state) => ({
+            pendingToggles: new Set(state.pendingToggles).add(habitId),
+            habits: state.habits.map((item) => item.id === habitId
+                ? {
+                    ...item,
+                    totalCompletions: item.totalCompletions + (wasCompleted ? -1 : 1),
+                    completedDays: item.completedDays.map((completed, index) =>
+                        index === dayIndex ? !completed : completed),
+                }
+                : item),
+        }))
+
         try {
-            if (isCompleted) {
+            if (wasCompleted) {
                 await axios.delete(`${apiUrl}/habit-logs/${habitId}`, requestConfig)
             } else {
                 await axios.post(`${apiUrl}/habit-logs/${habitId}`, {}, requestConfig)
             }
-            set((state) => ({
-                habits: state.habits.map((item) => item.id === habitId
-                    ? { ...item, totalCompletions: item.totalCompletions + (isCompleted ? -1 : 1), completedDays: item.completedDays.map((completed, index) => index === dayIndex ? !completed : completed) }
-                    : item),
-            }))
+            set((state) => {
+                const next = new Set(state.pendingToggles)
+                next.delete(habitId)
+                return { pendingToggles: next }
+            })
             return true
         } catch (error) {
-            set({ error: error.response?.data?.message || "Unable to update habit completion." })
+            // rollback to the pre-toggle state
+            set((state) => {
+                const next = new Set(state.pendingToggles)
+                next.delete(habitId)
+                return {
+                    pendingToggles: next,
+                    error: error.response?.data?.message || "Unable to update habit completion.",
+                    habits: state.habits.map((item) => item.id === habitId
+                        ? {
+                            ...item,
+                            totalCompletions: item.totalCompletions + (wasCompleted ? 1 : -1),
+                            completedDays: item.completedDays.map((completed, index) =>
+                                index === dayIndex ? !completed : completed),
+                        }
+                        : item),
+                }
+            })
             return false
         }
     },
@@ -109,8 +164,11 @@ export const useHabitStore = create((set) => ({
     addHabit: async (habitData) => {
         try {
             const response = await axios.post(`${apiUrl}/habits/create-habit`, habitData, requestConfig)
-            const newHabit = normalizeHabit(response.data.data, 0)
-            set((state) => ({ habits: [...state.habits, { ...newHabit, color: palette[state.habits.length % palette.length] }] }))
+            // safe to use normalizeHabit with no logs here — a brand-new habit has no history yet
+            set((state) => {
+                const newHabit = normalizeHabit(response.data.data, state.habits.length)
+                return { habits: [...state.habits, newHabit] }
+            })
             return true
         } catch (error) {
             set({ error: error.response?.data?.message || "Unable to create habit." })
@@ -118,11 +176,24 @@ export const useHabitStore = create((set) => ({
         }
     },
 
+    // Only patches the fields that can actually change from an edit — keeps
+    // completedDays / totalCompletions / color / icon intact from existing state
     updateHabit: async (habitId, habitData) => {
         try {
             const response = await axios.patch(`${apiUrl}/habits/${habitId}`, habitData, requestConfig)
-            const updatedHabit = normalizeHabit(response.data.data, 0)
-            set((state) => ({ habits: state.habits.map((habit) => habit.id === habitId ? { ...habit, ...updatedHabit, color: habit.color } : habit) }))
+            const updated = response.data.data
+
+            set((state) => ({
+                habits: state.habits.map((habit) => habit.id !== habitId ? habit : {
+                    ...habit,
+                    name: updated.name,
+                    category: updated.category,
+                    frequency: updated.frequency,
+                    target: Number(updated.target ?? habit.target),
+                    isArchived: Boolean(updated.isArchived),
+                    meta: `${updated.category || "General"} · ${updated.frequency === "weekly" ? "Weekly" : "Daily"}`,
+                }),
+            }))
             return true
         } catch (error) {
             set({ error: error.response?.data?.message || "Unable to update habit." })
@@ -130,22 +201,31 @@ export const useHabitStore = create((set) => ({
         }
     },
 
+    // Only flips isArchived — doesn't touch logs/color/anything else
     setArchived: async (habitId) => {
         try {
             const response = await axios.patch(`${apiUrl}/habits/${habitId}/toggle-status`, {}, requestConfig)
-            const updatedHabit = normalizeHabit(response.data.data, 0)
-            set((state) => ({ habits: state.habits.map((habit) => habit.id === habitId ? { ...habit, ...updatedHabit } : habit) }))
+            set((state) => ({
+                habits: state.habits.map((habit) => habit.id === habitId
+                    ? { ...habit, isArchived: Boolean(response.data.data.isArchived) }
+                    : habit),
+            }))
         } catch (error) {
             set({ error: error.response?.data?.message || "Unable to update habit status." })
         }
     },
 
     deleteHabit: async (habitId) => {
+        // optimistic remove, restore on failure
+        const previousHabits = get().habits
+        set((state) => ({ habits: state.habits.filter((habit) => habit.id !== habitId) }))
         try {
             await axios.delete(`${apiUrl}/habits/${habitId}`, requestConfig)
-            set((state) => ({ habits: state.habits.filter((habit) => habit.id !== habitId) }))
         } catch (error) {
-            set({ error: error.response?.data?.message || "Unable to delete habit." })
+            set({
+                habits: previousHabits,
+                error: error.response?.data?.message || "Unable to delete habit.",
+            })
         }
     },
 }))
