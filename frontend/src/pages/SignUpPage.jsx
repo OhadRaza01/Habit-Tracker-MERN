@@ -10,6 +10,7 @@ export default function SignupPage() {
     const [username, setUsername] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
     const [showSuccess, setShowSuccess] = useState(false)
@@ -153,17 +154,38 @@ export default function SignupPage() {
                         <label htmlFor="password" className="text-[11px] font-semibold uppercase tracking-wide text-[#6b6b6b]">
                             Password <span className="text-[#ff5a36]">*</span>
                         </label>
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            placeholder="Password"
-                            required
-                            className="mt-1 w-full rounded-sm border border-[#eee7db] bg-[#faf7f2] px-4 py-2 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
-                            onChange={(e) => {
-                                setPassword(e.target.value)
-                            }}
-                        />
+                        <div className="relative mt-1">
+                            <input
+                                id="password"
+                                name="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Password"
+                                required
+                                className="w-full rounded-sm border border-[#eee7db] bg-[#faf7f2] px-4 py-2 pr-10 text-sm text-[#14151a] placeholder:text-[#a3a3a3] outline-none transition-colors focus:border-[#ff5a36] focus:bg-white focus:ring-2 focus:ring-[#ff5a36]/20"
+                                onChange={(e) => {
+                                    setPassword(e.target.value)
+                                }}
+                            />
+                            <button
+                                type="button"
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                onClick={() => setShowPassword((prev) => !prev)}
+                                className="absolute inset-y-0 right-3 flex items-center justify-center text-[#bfbfbf] transition-colors hover:text-[#f96c4c]"
+                            >
+                                {showPassword ? (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                ) : (
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                        <path d="M4 4l16 16" />
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
                     </div>
 
                     <div>

@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
         const getCurrentUser = async () => {
             try {
                 const response = await axios.get(
-                    "http://localhost:8000/api/v1/users/me",
+                    `${import.meta.env.VITE_API_URL}/users/me`,
                     {
                         withCredentials: true,
                     }
@@ -28,8 +28,17 @@ export const AuthProvider = ({ children }) => {
         getCurrentUser();
     }, []);
 
+    const logout = async () => {
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL}/users/logout`, {}, { withCredentials: true });
+        } catch {
+        } finally {
+            setUser(null);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, setUser, loading }}>
+        <AuthContext.Provider value={{ user, setUser, loading, logout }}>
             {children}
         </AuthContext.Provider>
     );

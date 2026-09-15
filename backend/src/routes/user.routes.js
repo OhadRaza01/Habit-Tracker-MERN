@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getCurrentUser, loginUser, logoutUser, registerUser } from "../controllers/user.controller.js";
+import { forgotPassword, getCurrentUser, loginUser, logoutUser, registerUser, resetForgottenPassword, resetPassword } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import jwtVerify from "../middlewares/auth.middleware.js";
 
@@ -14,6 +14,14 @@ router.route("/login").post(
     loginUser
 )
 
+router.route("/forgot-password").post(
+    forgotPassword
+)
+
+router.route("/reset-forgotten-password/:token").post(
+    resetForgottenPassword
+)
+
 //protected routes
 
 router.route("/logout").post(
@@ -24,6 +32,11 @@ router.route("/logout").post(
 router.route("/me").get(
     jwtVerify,
     getCurrentUser
+)
+
+router.route("/reset-password/:token").post(
+    jwtVerify,
+    resetPassword
 )
 
 
