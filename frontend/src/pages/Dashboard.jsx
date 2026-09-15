@@ -32,6 +32,7 @@ export default function Dashboard() {
     const [editingHabit, setEditingHabit] = useState(null)
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
     const [selectedHabitId, setSelectedHabitId] = useState(null)
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     useEffect(() => {
         if (!authLoading && user) fetchHabits()
@@ -81,9 +82,23 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-[#fbfaf8] text-[#252321]">
-            <DashboardSidebar user={user} activeSection={activeSection} onNavigate={setActiveSection} onLogout={handleLogout} onSettings={() => setIsPasswordModalOpen(true)} />
+            <DashboardSidebar
+                user={user}
+                activeSection={activeSection}
+                onNavigate={(section) => {
+                    setActiveSection(section)
+                    setIsSidebarOpen(false)
+                }}
+                onLogout={handleLogout}
+                onSettings={() => {
+                    setIsPasswordModalOpen(true)
+                    setIsSidebarOpen(false)
+                }}
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+            />
             <main className="min-h-screen lg:ml-64">
-                <DashboardTopbar onAddHabit={() => setIsAddModalOpen(true)} />
+                <DashboardTopbar onAddHabit={() => setIsAddModalOpen(true)} onMenuClick={() => setIsSidebarOpen((open) => !open)} />
                 <div className="mx-auto max-w-360 px-5 pb-10 pt-7 sm:px-8 lg:px-10">
                     {loading ? <div className="flex min-h-[50vh] items-center justify-center"><p className="text-sm font-semibold text-[#928b83]">Loading your habits...</p></div> : error && habits.length === 0 ? <div className="rounded-2xl border border-[#f3d8cf] bg-white px-6 py-10 text-center"><p className="text-lg font-bold">We couldn&apos;t load your habits</p><p className="mt-2 text-sm text-[#c85b3c]">{error}</p></div> : activeSection === "overview" ? <>
                         <section className="flex flex-col justify-between gap-5 border-b border-[#ece8e2] pb-7 md:flex-row md:items-end">
