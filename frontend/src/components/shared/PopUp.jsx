@@ -8,6 +8,8 @@ export default function PopUp({
     message,
     buttonText = "Continue",
     onButtonClick,
+    cancelButtonText,
+    onCancel,
 }) {
     if (!isOpen) return null;
 
@@ -36,13 +38,24 @@ export default function PopUp({
                     </p>
                 )}
 
-                <button
-                    type="button"
-                    onClick={onButtonClick}
-                    className="mt-6 w-full rounded-xl cursor-pointer bg-[#ff5a36] px-6 py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
-                >
-                    {buttonText}
-                </button>
+                <div className={`mt-6 flex gap-3 ${cancelButtonText ? "" : "flex-col"}`}>
+                    {cancelButtonText && (
+                        <button
+                            type="button"
+                            onClick={onCancel || onClose}
+                            className="flex-1 rounded-xl border border-[#eee7db] px-6 py-3 text-sm font-semibold text-[#6b6b6b] transition-colors hover:bg-[#faf7f2]"
+                        >
+                            {cancelButtonText}
+                        </button>
+                    )}
+                    <button
+                        type="button"
+                        onClick={onButtonClick}
+                        className="flex-1 rounded-xl cursor-pointer bg-[#ff5a36] px-6 py-3 text-sm font-semibold text-white shadow-md transition-colors hover:bg-[#ff5a36]/90"
+                    >
+                        {buttonText}
+                    </button>
+                </div>
             </div>
         </div>
     );
