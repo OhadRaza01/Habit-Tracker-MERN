@@ -1,7 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from "axios"
 
 export default function ForgotPasswordPage() {
+    useEffect(() => {
+        document.title = "Forgot Password | Habitly"
+    }, [])
+
     const [email, setEmail] = useState("")
     const [message, setMessage] = useState("")
     const [loading, setLoading] = useState(false)

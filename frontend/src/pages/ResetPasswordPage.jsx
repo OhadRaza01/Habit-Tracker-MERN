@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from "axios"
 import { useParams, useNavigate, Link } from 'react-router-dom'
 
 export default function ResetPasswordPage() {
+    useEffect(() => {
+        document.title = "Reset Password | Habitly"
+    }, [])
+
     const { token } = useParams()
     const navigate = useNavigate()
 

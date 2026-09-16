@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios"
 import logo from "../assets/logo.png"
 import PopUp from "../components/shared/PopUp";
 
 export default function SignupPage() {
+    useEffect(() => {
+        document.title = "Create Account | Habitly"
+    }, [])
+
     const [avatarName, setAvatarName] = useState("");
     const [fullname, setFullname] = useState("")
     const [username, setUsername] = useState("")

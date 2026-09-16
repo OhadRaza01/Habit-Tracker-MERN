@@ -37,6 +37,14 @@ export default function Dashboard() {
     const [isLogoutPromptOpen, setIsLogoutPromptOpen] = useState(false)
 
     useEffect(() => {
+        document.title = "Dashboard | Habitly"
+
+        return () => {
+            document.title = "Habitly - Build Better Habits"
+        }
+    }, [])
+
+    useEffect(() => {
         if (!authLoading && user) fetchHabits()
     }, [authLoading, user, fetchHabits])
 

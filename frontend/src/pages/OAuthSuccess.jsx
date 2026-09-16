@@ -9,6 +9,10 @@ export default function OAuthSuccess() {
     const { setUser } = useAuth()
 
     useEffect(() => {
+        document.title = "Signing In | Habitly"
+    }, [])
+
+    useEffect(() => {
         const fetchUser = async () => {
             try {
                 const userResponse = await axios.get(
