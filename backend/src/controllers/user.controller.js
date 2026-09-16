@@ -8,7 +8,8 @@ import { sendPasswordResetEmail } from "../utils/sendEmail.js";
 
 const options = {
     httpOnly: true,
-    secure: true
+    secure: true,
+    sameSite: "none"
 }
 
 const generateAccessAndRefreshToken = async (userId) => {

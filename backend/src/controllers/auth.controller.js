@@ -3,7 +3,8 @@ import asyncHandler from "../utils/asyncHandler.js"
 
 const cookieOptions = {
     httpOnly: true,
-    secure: true
+    secure: true,
+    sameSite: "none"
 };
 
 export const googleAuthCallback = asyncHandler(async (req, res) => {
