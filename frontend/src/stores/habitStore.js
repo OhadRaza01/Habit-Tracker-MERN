@@ -1,34 +1,12 @@
 import axios from "axios"
 import { create } from "zustand"
+import { getDateKey, getLocalISOString, getWeekDateKeys } from "../utils/dateUtil"
 
 const apiUrl = import.meta.env.VITE_API_URL
 const palette = ["bg-[#fff0e8]", "bg-[#f2efff]", "bg-[#eaf7fb]", "bg-[#fff7df]"]
 const STALE_MS = 60 * 1000 // how long cached data is considered "fresh" (tune as needed)
 
-const dateFormatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Karachi",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-})
-
-export const getDateKey = (date) => {
-    const parts = dateFormatter.formatToParts(new Date(date))
-    const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]))
-    return `${values.year}-${values.month}-${values.day}`
-}
-
-export const getWeekDateKeys = () => {
-    const todayKey = getDateKey(new Date())
-    const [year, month, day] = todayKey.split("-").map(Number)
-    const today = new Date(Date.UTC(year, month - 1, day, 12))
-    const daysSinceMonday = (today.getUTCDay() + 6) % 7
-
-    return Array.from({ length: 7 }, (_, index) => {
-        const date = new Date(Date.UTC(year, month - 1, day - daysSinceMonday + index, 12))
-        return getDateKey(date)
-    })
-}
+export { getDateKey, getLocalISOString, getWeekDateKeys }
 
 const normalizeHabit = (habit, index, logs = [], dateKeys = getWeekDateKeys()) => ({
     ...habit,
@@ -117,10 +95,11 @@ export const useHabitStore = create((set, get) => ({
         }))
 
         try {
+            const date = getWeekDateKeys()[dayIndex]
             if (wasCompleted) {
-                await axios.delete(`${apiUrl}/habit-logs/${habitId}`, requestConfig)
+                await axios.delete(`${apiUrl}/habit-logs/${habitId}`, { ...requestConfig, data: { date } })
             } else {
-                await axios.post(`${apiUrl}/habit-logs/${habitId}`, {}, requestConfig)
+                await axios.post(`${apiUrl}/habit-logs/${habitId}`, { date }, requestConfig)
             }
             set((state) => {
                 const next = new Set(state.pendingToggles)

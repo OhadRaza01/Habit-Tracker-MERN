@@ -3,6 +3,7 @@ import { Habit } from "../models/habit.model.js"
 import { HabitLog } from "../models/habitlog.model.js"
 import { getTodayStats, getCurrentStreak } from "../services/dashboard.service.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
+import { getDateKey } from "../utils/dateUtil.js"
 
 const getdashboard = asyncHandler(async (req, res) => {
 
@@ -15,15 +16,12 @@ const getdashboard = asyncHandler(async (req, res) => {
         owner: req.user.id
     }).sort({ date: 1 })
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayKey = getDateKey(new Date());
 
     const completedTodayHabitIds = new Set(
         logs
             .filter((log) => {
-                const logDate = new Date(log.date);
-                logDate.setHours(0, 0, 0, 0);
-                return logDate.getTime() === today.getTime();
+                return getDateKey(log.date) === todayKey;
             })
             .map((log) => log.habit.toString())
     );

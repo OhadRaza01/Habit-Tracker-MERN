@@ -1,4 +1,4 @@
-import { getDateKey } from "../utils/dateUtil.js";
+import { getDateForKey, getDateKey } from "../utils/dateUtil.js";
 
 const calculateHabitStatistics = (habit, logs) => {
 
@@ -16,8 +16,8 @@ const calculateHabitStatistics = (habit, logs) => {
     const startDateKey = getDateKey(habit.startDate);
     const todayKey = getDateKey(new Date());
 
-    const startDate = new Date(`${startDateKey}T00:00:00`);
-    const today = new Date(`${todayKey}T00:00:00`);
+    const startDate = getDateForKey(startDateKey);
+    const today = getDateForKey(todayKey);
 
     const totalDaysTracked =
         Math.floor(
@@ -67,13 +67,9 @@ const calculateHabitStatistics = (habit, logs) => {
 
     if (uniqueDates.length > 0) {
 
-        const latestDate =
-            new Date(
-                `${uniqueDates[uniqueDates.length - 1]}T00:00:00`
-            );
+        const latestDate = getDateForKey(uniqueDates[uniqueDates.length - 1]);
 
-        const todayDate =
-            new Date(`${todayKey}T00:00:00`);
+        const todayDate = getDateForKey(todayKey);
 
         const daysSinceLatest =
             (todayDate - latestDate) /

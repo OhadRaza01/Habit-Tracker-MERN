@@ -5,12 +5,19 @@ import { HabitLog } from "../models/habitlog.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Habit } from "../models/habit.model.js";
 import { calculateHabitStatistics } from "../services/habitstats.service.js";
+import { getDateForKey, getDateKey, getDateRangeForKey, getLocalISOString, isDateKey } from "../utils/dateUtil.js";
 
 const createLog = asyncHandler(async (req, res) => {
 
-    const { habitId } = req.params
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { habitId } = req.params;
+    const currentISOString = getLocalISOString();
+    const dateKey = req.body?.date || getDateKey(currentISOString);
+
+    if (!isDateKey(dateKey)) {
+        throw new ApiError(400, "Invalid habit log date.");
+    }
+
+    const logDate = getDateForKey(dateKey);
 
     if (!mongoose.isValidObjectId(habitId)) {
         throw new ApiError(400, "Invalid habit id.")
@@ -28,20 +35,20 @@ const createLog = asyncHandler(async (req, res) => {
     const existedLog = await HabitLog.findOne({
         habit: habitId,
         owner: req.user._id,
-        date: today
+        date: getDateRangeForKey(dateKey)
     })
 
     if (existedLog) {
         throw new ApiError(
             409,
-            "Habit is already completed today."
+            "Habit is already completed on that date."
         );
     }
 
     const log = await HabitLog.create({
         habit: habitId,
         owner: req.user._id,
-        date: today
+        date: logDate
     });
 
     return res
@@ -57,9 +64,15 @@ const createLog = asyncHandler(async (req, res) => {
 
 const deleteLog = asyncHandler(async (req, res) => {
 
-    const { habitId } = req.params
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { habitId } = req.params;
+    const currentISOString = getLocalISOString();
+    const dateKey = req.body?.date || getDateKey(currentISOString);
+
+    if (!isDateKey(dateKey)) {
+        throw new ApiError(400, "Invalid habit log date.");
+    }
+
+    const logDate = getDateForKey(dateKey);
 
     if (!mongoose.isValidObjectId(habitId)) {
         throw new ApiError(400, "Invalid habit id.")
@@ -77,7 +90,7 @@ const deleteLog = asyncHandler(async (req, res) => {
     const log = await HabitLog.findOneAndDelete({
         habit: habitId,
         owner: req.user._id,
-        date: today
+        date: getDateRangeForKey(dateKey)
     })
 
     if (!log) {
@@ -115,7 +128,7 @@ const getHabitHistory = asyncHandler(async (req, res) => {
     const habitHistory = await HabitLog.find({
         habit: habitId,
         owner: req.user._id
-    })
+    }).sort({ date: 1 })
 
     return res
         .status(200)

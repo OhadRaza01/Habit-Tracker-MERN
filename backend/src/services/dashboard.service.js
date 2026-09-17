@@ -1,4 +1,4 @@
-import { getDateKey } from "../utils/dateUtil.js";
+import { getDateForKey, getDateKey } from "../utils/dateUtil.js";
 
 const getTodayStats = (habits, logs) => {
 
@@ -38,11 +38,11 @@ const getCurrentStreak = (habits, logs) => {
         return acc;
     }, {});
 
-    const cursor = new Date();
-    const todayKey = getDateKey(cursor);
+    const todayKey = getDateKey(new Date());
+    let cursor = getDateForKey(todayKey);
 
     if (dateCounts[todayKey] !== totalHabits) {
-        cursor.setDate(cursor.getDate() - 1);
+        cursor.setUTCDate(cursor.getUTCDate() - 1);
     }
 
     let streak = 0;
@@ -55,7 +55,7 @@ const getCurrentStreak = (habits, logs) => {
         }
 
         streak++;
-        cursor.setDate(cursor.getDate() - 1);
+        cursor.setUTCDate(cursor.getUTCDate() - 1);
     }
 
     return streak;
