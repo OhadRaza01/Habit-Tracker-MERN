@@ -58,8 +58,11 @@ export default function Dashboard() {
     const todayIndex = dateKeys.indexOf(getDateKey(new Date()))
     const completedToday = activeHabits.filter((habit) => habit.completedDays[todayIndex]).length
     const totalCheckIns = activeHabits.reduce((total, habit) => total + habit.totalCompletions, 0)
+    const weeklyCompletedCounts = activeHabits.length > 0
+        ? activeHabits[0].completedDays.map((_, dayIndex) => activeHabits.filter((habit) => habit.completedDays[dayIndex]).length)
+        : [0, 0, 0, 0, 0, 0, 0]
     const weeklyProgress = activeHabits.length > 0
-        ? activeHabits[0].completedDays.map((_, dayIndex) => Math.round((activeHabits.filter((habit) => habit.completedDays[dayIndex]).length / activeHabits.length) * 100))
+        ? weeklyCompletedCounts.map((completedCount) => Math.round((completedCount / activeHabits.length) * 100))
         : [0, 0, 0, 0, 0, 0, 0]
     const averageCompletion = Math.round(weeklyProgress.reduce((total, value) => total + value, 0) / weeklyProgress.length)
     const currentStreak = weeklyProgress.slice(0, todayIndex + 1).reverse().findIndex((completion) => completion < 100)
@@ -118,7 +121,7 @@ export default function Dashboard() {
                             <button type="button" className="flex w-fit items-center gap-5 rounded-xl border border-[#e9e3dc] bg-white px-3 py-2 text-sm font-semibold shadow-sm"><span className="text-[#9c958d]">‹</span><span>Today</span><span className="text-[#9c958d]">›</span></button>
                         </section>
                         <section className="mt-7 grid gap-4 md:grid-cols-3"><StatsCard icon="check" label="Completed today" value={completedToday} suffix={`/ ${activeHabits.length}`} progress={activeHabits.length ? Math.round((completedToday / activeHabits.length) * 100) : 0} detail={`${activeHabits.length ? Math.round((completedToday / activeHabits.length) * 100) : 0}%`} accent="orange" /><StatsCard icon="flame" label="Current streak" value={streakDays} suffix=" days" detail={`${completedToday} today`} accent="peach" /><StatsCard icon="target" label="Total check-ins" value={totalCheckIns} suffix=" times" detail={`${weeklyProgress[bestDayIndex]}% best day`} accent="blue" /></section>
-                        <section className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.95fr]"><HabitProgressCard habits={activeHabits} todayIndex={todayIndex} onToggle={toggleHabit} onSelectHabit={selectHabit} /><WeeklyProgress points={weeklyProgress} dates={dateKeys} averageCompletion={averageCompletion} /></section>
+                        <section className="mt-6 grid gap-6 xl:grid-cols-[1.45fr_0.95fr]"><HabitProgressCard habits={activeHabits} todayIndex={todayIndex} onToggle={toggleHabit} onSelectHabit={selectHabit} /><WeeklyProgress points={weeklyProgress} completedCounts={weeklyCompletedCounts} dates={dateKeys} averageCompletion={averageCompletion} /></section>
                     </> : activeSection === "my-habits" ? <HabitManager habits={habits} onSelectHabit={selectHabit} onArchive={setArchived} onDelete={deleteHabit} /> : <HabitDetail habit={selectedHabit} stats={selectedHabitId ? habitStats[selectedHabitId] : null} loading={!selectedHabitId || !habitStats[selectedHabitId]} onEdit={editHabit} onBack={() => setActiveSection("my-habits")} />}
                 </div>
             </main>
